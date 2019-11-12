@@ -1,40 +1,39 @@
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
+
 
 public class RouterTable{
 
-    private class Interface{
+    private class Entrada {
         private IPv4 ipRede;
         private IPv4 ipDestino;
         private int porta;
 
-        public Interface(IPv4 ip1, IPv4 ip2, int nporta){
-            ipRede = nIpRede;
-            ipDestino = nipDestino;
-            porta = nporta;
+        public Entrada(IPv4 ipRede, IPv4 ipDestino, int porta){
+            this.ipRede = ipRede;
+            this.ipDestino = ipDestino;
+            this.porta = porta;
         }
-        public int getPorta(){
-            return porta;
-        }
-
-        public IPv4 getIpRede(){
-            return ipRede;
-        }
-
-        public IPv4 getIpDestino(){
-            return ipDestino;
-        }
+        
+        public int getPorta() { return porta; }
+        public IPv4 getIpRede() { return ipRede; }
+        public IPv4 getIpDestino() { return ipDestino; }
 
     }
 
-    ArrayList<Interface> portas;
+    ArrayList<Entrada> portas;
 
-    public RouterTable(){
-        portas = new ArrayList<Interface>();
+    public RouterTable() {
+        portas = new ArrayList<Entrada>();
     }
 
-    public void addPorta(IPv4 ipRede, IPv4 ipDestino, int porta){
-        Interface n = new Interface(ipRede, ipDestino, porta);
+    public void add(IPv4 ipRede, IPv4 ipDestino, int porta){
+        Entrada n = new Entrada(ipRede, ipDestino, porta);
+        portas.add(n);
+    }
+
+    public void add(IPv4 ipRede, int porta){
+        Entrada n = new Entrada(ipRede, null, porta);
         portas.add(n);
     }
 

@@ -1,18 +1,15 @@
+import java.util.List;
+import java.util.ArrayList;
+
 public class Router {
     private String id;
-    private String mac;
-    private IPv4 ip;
-    private int mtu;
-    private IPv4 rede;
+    private List<Interface> interfaces;
     private RouterTable rtable;
     private ArpTable atable;
 
     public Router (String id, String mac, String ip, int mtu, String rede) {
         this.id = id;
-        this.mac = mac;
-        this.ip = new IPv4(ip);
-        this.mtu = mtu;
-        this.rede = new IPv4(rede);
+        interfaces = new ArrayList<Interface>();
         rtable = new RouterTable();
         atable = new ArpTable();
     }
