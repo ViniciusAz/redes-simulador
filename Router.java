@@ -7,10 +7,15 @@ public class Router {
     private RouterTable rtable;
     private ArpTable atable;
 
-    public Router (String id, String mac, String ip, int mtu, String rede) {
+    public Router (String id, ArrayList<Interface> interfaces, RouterTable rtable) {
         this.id = id;
-        interfaces = new ArrayList<Interface>();
-        rtable = new RouterTable();
+        this.interfaces = interfaces;
+        this.rtable = rtable;
         atable = new ArpTable();
     }
+
+    public String getId() { return id; }
+    //busca na arp
+    //busca na routertable
+    //busca na interface
 }

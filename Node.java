@@ -9,4 +9,7 @@ public class Node {
         atable = new ArpTable();
     }
 
+    public String getId() { return id; }
+    //interface
+    //add
 }
