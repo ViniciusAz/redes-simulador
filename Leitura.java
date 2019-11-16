@@ -35,8 +35,8 @@ public class Leitura {
                 else if(linha.equals("#ROUTER")) { ehRouter = true; ehNode = ehRouterT = false; }
                 else if(linha.equals("#ROUTERTABLE")) { ehRouterT = true; ehNode = ehRouter = false;
                 } else {
+                    aux = linha.split(",");
                     if(ehRouter) {
-                        aux = linha.split(",");
                         ArrayList<Interface> listaInterfaces = new ArrayList<Interface>();
                         for(int i = 0; i < Integer.parseInt(aux[1]); i++) {
                             //                                   ID        IP             MAC          MTU
@@ -45,9 +45,16 @@ public class Leitura {
                         roteadores.add(new Router(aux[0], listaInterfaces, novaRouterTable));
 
                     } else if(ehNode) {
-
+                        //estrutura :       id,     mac,     ip,             mtu,           gateway
+                        nodos.add(new Node(aux[0], aux[1], aux[2], Integer.parseInt(aux[3]), aux[4]));
                     } else {
-
+                        for (Router r : roteadores) {
+                            if(r.getId() == aux[0]) {
+                                //estrutura :                      ip     ip    interface
+                                r.addRouterTable(new RouterTable(aux[1], aux[2], aux[3]));
+                                break;
+                            }
+                        }
                     }
                 }
             }

@@ -1,11 +1,11 @@
 public class Node {
     private String id;
-    private Interface interface;
+    private Interface porta;
     private ArpTable atable;
 
-    public Node(String id, String mac, String ip, int mtu) {
+    public Node(String id, String mac, String ip, int mtu, String gateway) {
         this.id = id;
-        interface = new Interface("e0", ip, mac, mtu);
+        porta = new Interface("e0", ip, mac, mtu, gateway);
         atable = new ArpTable();
     }
 
