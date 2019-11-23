@@ -1,35 +1,44 @@
 public class IPv4 {
 
     private String ip;
+    private String rede;
     private int cidr;
-    private int endereco;
-    private int rede;
+    private int ipBin;
+    private int redeBin;
 
     public IPv4(String ip) {
         this.ip = ip;
         //Fazer o split da string e tratamento, etc.
         String[] array = ip.split("\\/");
-        cidr = Integer.parseInt(array[1]);
+        if(array.length > 1)
+            cidr = Integer.parseInt(array[1]);
+        else
+            cidr = 0;
         array = array[0].split("\\.");
-        endereco = (Integer.parseInt(array[0]) << 24)
+        ipBin = (Integer.parseInt(array[0]) << 24)
                  + (Integer.parseInt(array[1]) << 16)
                  + (Integer.parseInt(array[2]) << 8)
                  + Integer.parseInt(array[3]);
-        rede = (endereco & (Integer.MAX_VALUE << (32 - cidr)));
+        if(cidr > 0) {
+            redeBin = (ipBin & (Integer.MAX_VALUE << (32 - cidr)));
+            rede = (redeBin >> 24 & 0xFF) + "." + (redeBin >> 16 & 0xFF) + "." + (redeBin >> 8 & 0xFF) + "." + (redeBin & 0xFF);
+        } else {
+            redeBin = 0;
+            rede = "";
+        }
     }
 
-    public String getIp() { return ip; }
+    public int getIp() { return ipBin; }
     public int getCidr() { return cidr; }
-    public int getEndereco() { return endereco; }
-    public int getRedeBin() { return rede; }
-    public String getRede() { return "rede"; }
+    public int getRede() { return redeBin; }
+    public String printIp() { return ip; }
+    public String printRede() { return rede; }
     
     public String toString() {
         return (
-            "Endereço IP : " + ip +
+            "Endereço IP : " + ip + " (" + ipBin + ")" +
             "\nCidr        : " + cidr +
-            "\nIP Binario  : " + endereco +
-            "\nRede        : " + rede
+            "\nRede        : " + rede + " (" + redeBin + ")"
         );
     }
 
