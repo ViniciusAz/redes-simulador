@@ -1,8 +1,9 @@
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 
 public class App {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         //Rede rede = new Rede(args[0], args[1], args[2], args[3]);
 
         //Ajustando e testando cada classe
@@ -36,6 +37,16 @@ public class App {
 
         System.out.println(n1);
         System.out.println(n2);
+
+        System.out.println("--------------------");
+        Leitura le = new Leitura(args[0]);
+        List<Node> nodos = le.getNodos();
+        List<Router> rot = le.getRoteadores();
+        System.out.println(nodos.size() + " r= " + rot.size());
+        for (Node n : nodos) {
+            System.out.println(n);
+        }
+
         System.out.println("Simulador de Rede");
 
     }

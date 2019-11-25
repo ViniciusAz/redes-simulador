@@ -1,3 +1,4 @@
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,13 +9,13 @@ public class Rede {
     public Node origem, destino;
     public Object atual;
 
-    public Rede(String arquivo, String noOrigem, String noDestino, String mensagem) {
+    public Rede(String arquivo, String noOrigem, String noDestino, String mensagem) throws FileNotFoundException {
         Leitura io = new Leitura(arquivo);
         nodos = io.getNodos();
         roteadores = io.getRoteadores();
-        origem = new Node(getN(noOrigem));
-        destino = new Node(getN(noDestino));
-        atual = new Node(getN(noOrigem));
+        origem = getN(noOrigem);
+        destino = getN(noDestino);
+        atual = getN(noOrigem);
         pacotes = new ArrayList<Pacote>();
         online();
     }
@@ -38,34 +39,66 @@ public class Rede {
     }
 
     public void online() {
-        while(atual.getId() != destino.getId()) {
-            //processo todo
-            if(atual.getRede() == destino.getRede()) {
-                // verifica se o destino ta na ARP
-                if(atual.temArp(destino.getIp())) {
-                    ajustaPacote();
-                    for (Pacote p : pacotes) { printIcmpEchoRequest(destino, p); }
-                    atual = destino;
-                } else /* se nao for mesma rede, faz arp rq/reply */ {
-                    printArpRequest();
-                    destino.add(atual.getIp(), atual.getMac());
-                    atual.add(atual.getIp(), destino.getMac());
-                    printArpReply(destino);
+        if(atual instanceof Node) {
+            while(((Node) atual).getId() != destino.getId()) {
+                //processo todo
+                if(((Node) atual).getRede() == destino.getRede()) {
+                    // verifica se o destino ta na ARP
+                    if(((Node) atual).temArp(destino.getIp())) {
+                        ajustaPacote();
+                        for (Pacote p : pacotes) { printIcmpEchoRequest(destino, p); }
+                        atual = destino;
+                    } else /* se nao for mesma rede, faz arp rq/reply */ {
+                        printArpRequest();
+                        destino.add(((Node) atual).getIp(), ((Node) atual).getMac());
+                        ((Node) atual).add(((Node) atual).getIp(), destino.getMac());
+                        printArpReply(destino);
+                    }
+                } else {
+                    // //n ta NA REDE TEM Q IR PRO gateway ROUTER
+                    //     if(atual.temArp(atual.getGateway())) {
+                    //         icmp > router 
+                    //     atual = router
+                    // } else /**/ {
+                    //         x
+                    // }
+                    //     ICMP
+                    //     ELSE
+                    //     ARP RQ > gateway padrao
                 }
-            } else {
-                // //n ta NA REDE TEM Q IR PRO gateway ROUTER
-                //     if(atual.temArp(atual.getGateway())) {
-                //         icmp > router 
-                //     atual = router
-                // } else /**/ {
-                //         x
-                // }
-                //     ICMP
-                //     ELSE
-                //     ARP RQ > gateway padrao
-            }
+
+            } //while
+        } else /*atual é router*/{
+            while(((Router) atual).getId() != destino.getId()) {
+                //processo todo
+                if(((Router) atual).getRede() == destino.getRede()) {
+                    // verifica se o destino ta na ARP
+                    if(((Router) atual).temArp(destino.getIp())) {
+                        ajustaPacote();
+                        for (Pacote p : pacotes) { printIcmpEchoRequest(destino, p); }
+                        ((Router) atual) = destino;
+                    } else /* se nao for mesma rede, faz arp rq/reply */ {
+                        printArpRequest();
+                        destino.add(((Router) atual).getIp(), ((Router) atual).getMac());
+                        ((Router) atual).add(((Router) atual).getIp(), destino.getMac());
+                        printArpReply(destino);
+                    }
+                } else {
+                    // //n ta NA REDE TEM Q IR PRO gateway ROUTER
+                    //     if(atual.temArp(atual.getGateway())) {
+                    //         icmp > router 
+                    //     atual = router
+                    // } else /**/ {
+                    //         x
+                    // }
+                    //     ICMP
+                    //     ELSE
+                    //     ARP RQ > gateway padrao
+                }
+                
+            } //while
+        }
             
-        } //while
     }
 
     public void ajustaPacote() {
