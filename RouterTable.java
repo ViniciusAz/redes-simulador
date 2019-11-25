@@ -38,18 +38,24 @@ public class RouterTable{
         }
         return x;
     }
-    public boolean temSalto() { return proxHop != null; }
+    public boolean temSalto(IPv4 rede) {
+        boolean x = false;
+        for (Entrada e : lista) {
+            if(e.getproxHop() != null) x = true;
+        }
+        return x;
+    }
 
     public Interface getPortaRede(IPv4 rede) {
 		// Cria uma rede com 0.0.0.0 para ser o qualquer
 		IPv4 redeZero = new IPv4("0.0.0.0/0");
 		// Acha o IP e manda para a porta
         for(int i = 0; i < lista.size(); i++)
-            if(lista.get(i).getIpRede() == rede)
+            if(lista.get(i).getRede() == rede)
                 return lista.get(i).getPorta();
 		//Vai para o QUALQUER -> usando o próximo HOP
         for(int i = 0; i < lista.size(); i++)
-			if(lista.get(i).getIpRede() == redeZero)
+			if(lista.get(i).getRede() == redeZero)
 				return lista.get(i).getPorta();	
 			
 		return null; // Deu algum problema !

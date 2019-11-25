@@ -40,9 +40,9 @@ public class Leitura {
                         ArrayList<Interface> listaInterfaces = new ArrayList<Interface>();
                         for(int i = 0; i < Integer.parseInt(aux[1]); i++) {
                             //                                   ID        IP             MAC          MTU
-                            listaInterfaces.add(new Interface(("e"+i), aux[3*(3+i)], aux[2*(3+i)], Integer.parseInt(aux[4*(3+i)])));
+                            listaInterfaces.add(new Interface(i, aux[3*(3+i)], aux[2*(3+i)], Integer.parseInt(aux[4*(3+i)]), ""));
                         }
-                        roteadores.add(new Router(aux[0], listaInterfaces, novaRouterTable));
+                        roteadores.add(new Router(aux[0], listaInterfaces, new RouterTable()));
 
                     } else if(ehNode) {
                         //estrutura :       id,     mac,     ip,             mtu,           gateway
@@ -51,7 +51,7 @@ public class Leitura {
                         for (Router r : roteadores) {
                             if(r.getId() == aux[0]) {
                                 //estrutura :                      ip     ip    interface
-                                r.addRouterTable(new RouterTable(aux[1], aux[2], aux[3]));
+                                r.addRouterTable(aux[1], aux[2], aux[3]);
                                 break;
                             }
                         }

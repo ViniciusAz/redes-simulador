@@ -15,7 +15,28 @@ public class Router {
     }
 
     public String getId() { return id; }
-    //busca na arp
-    //busca na routertable
-    //busca na interface
+
+    
+    public void add(IPv4 ip, String mac) { atable.add(ip, mac); }
+    public boolean temArp(IPv4 ip) { return atable.get(ip) != null; }
+    
+    public void addRouterTable(String rede, String proxHop, String porta) {
+        if(proxHop == "0.0.0.0") rtable.add(new IPv4(rede), null, getPorta(porta));
+        else rtable.add(new IPv4(rede), new IPv4(proxHop), getPorta(porta));
+    }
+
+    public Interface getPorta(String porta) {
+        for (Interface i : interfaces) {
+            if(i.getId() == Integer.parseInt(porta))
+                return i;
+        }
+        return null;
+    }
+
+    // esses metodos tem que desbravar a RouterT
+    // public IPv4 getIp() { return porta.getIp(); }
+    // public int getRede() { return getIp().getRede(); }
+    // public String getMac() { return porta.getMac(); }
+    // public int getMtu() { return porta.getMtu(); }
+    // public String printIp() { return porta.printIp(); }
 }
