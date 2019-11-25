@@ -56,8 +56,8 @@ public class Leitura {
                         nodos.add(new Node(aux[0], aux[2], aux[1], Integer.parseInt(aux[3]), aux[4]));
                     } else {
                         for (Router r : roteadores) {
-                            if(r.getId() == aux[0]) {
-                                //estrutura :                      ip     ip    interface
+                            if(r.getId().equals(aux[0])) {
+                                //estrutura :       ip     ip    interface
                                 r.addRouterTable(aux[1], aux[2], aux[3]);
                                 break;
                             }

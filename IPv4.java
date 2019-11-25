@@ -1,6 +1,7 @@
 public class IPv4 {
 
-    private String ip;
+    private String ip; //192.168.1.1/8
+    private String ipNoCidr;
     private String rede;
     private int cidr;
     private int ipBin;
@@ -10,6 +11,7 @@ public class IPv4 {
         this.ip = ip;
         //Fazer o split da string e tratamento, etc.
         String[] array = ip.split("\\/");
+        ipNoCidr = array[0];
         if(array.length > 1)
             cidr = Integer.parseInt(array[1]);
         else
@@ -33,6 +35,7 @@ public class IPv4 {
     public int getRede() { return redeBin; }
     public String printIp() { return ip; }
     public String printRede() { return rede; }
+    public String printIpNoCidr() { return ipNoCidr; }
     
     public String toString() {
         return (

@@ -15,11 +15,22 @@ public class Router {
     }
 
     public String getId() { return id; }
+    public Interface getPortaGateway(String ip) {
+        for (Interface i : interfaces) {
+            if(i.getIp().printIpNoCidr().equals(ip)) return i;
+        }
+        return null;
+    }
 
-    
     public void add(IPv4 ip, String mac) { atable.add(ip, mac); }
     public boolean temArp(IPv4 ip) { return atable.get(ip) != null; }
     
+    public Interface buscaRouterTable(String rede) {
+        return rtable.getPortaRede(rede);
+    }
+    public String buscaProximoHop(String rede) {
+        return rtable.getHop(rede).printIpNoCidr();
+    }
     public void addRouterTable(String rede, String proxHop, String porta) {
         if(proxHop == "0.0.0.0") rtable.add(new IPv4(rede), null, getPorta(porta));
         else rtable.add(new IPv4(rede), new IPv4(proxHop), getPorta(porta));
@@ -31,6 +42,11 @@ public class Router {
                 return i;
         }
         return null;
+    }
+    public RouterTable getRT() {
+        System.out.println(rtable.size());
+
+        return rtable;
     }
 
     // esses metodos tem que desbravar a RouterT

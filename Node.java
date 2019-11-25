@@ -16,6 +16,7 @@ public class Node {
     public int getMtu() { return porta.getMtu(); }
     public String getGateway() { return porta.getGateway(); }
     public String printIp() { return porta.printIp(); }
+    public String printRede() { return porta.getIp().printRede(); }
     public void add(IPv4 ip, String mac) { atable.add(ip, mac); }
     public boolean temArp(IPv4 ip) { return atable.get(ip) != null; }
 

@@ -4,6 +4,7 @@ import java.util.List;
 
 public class App {
     public static void main(String[] args) throws FileNotFoundException {
+        // System.out.println("Simulador de Rede\n Derick Garcez, Vinicius Azevedo");
         Rede rede = new Rede(args[0], args[1], args[2], args[3]);
 
 
@@ -53,7 +54,6 @@ public class App {
         //     System.out.println(n);
         // }
 
-        System.out.println("Simulador de Rede");
 
     }
 }

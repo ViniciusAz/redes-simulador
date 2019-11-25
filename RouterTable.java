@@ -31,10 +31,10 @@ public class RouterTable{
         lista.add(new Entrada(rede, null, porta));
     }
 
-    public boolean temEntrada(IPv4 rede) {
+    public boolean temEntrada(String rede) {
         boolean x = false;
         for (Entrada e : lista) {
-            if(e.getRede() == rede) x = true;
+            if(e.getRede().printIpNoCidr().equals(rede)) x = true;
         }
         return x;
     }
@@ -46,18 +46,42 @@ public class RouterTable{
         return x;
     }
 
-    public Interface getPortaRede(IPv4 rede) {
-		// Cria uma rede com 0.0.0.0 para ser o qualquer
-		IPv4 redeZero = new IPv4("0.0.0.0/0");
-		// Acha o IP e manda para a porta
+    public Interface getPortaRede(String rede) {
+        // Acha o IP e manda para a porta
         for(int i = 0; i < lista.size(); i++)
-            if(lista.get(i).getRede() == rede)
+            if(lista.get(i).getRede().printIpNoCidr().equals(rede))
                 return lista.get(i).getPorta();
 		//Vai para o QUALQUER -> usando o próximo HOP
+		// Cria uma rede com 0.0.0.0 para ser o qualquer
         for(int i = 0; i < lista.size(); i++)
-			if(lista.get(i).getRede() == redeZero)
+			if(lista.get(i).getRede().printIpNoCidr().equals("0.0.0.0"))
 				return lista.get(i).getPorta();	
 			
 		return null; // Deu algum problema !
+    }
+    public IPv4 getHop(String rede) {
+        // Acha o IP e manda para a porta
+        for(int i = 0; i < lista.size(); i++)
+            if(lista.get(i).getRede().printIpNoCidr().equals(rede))
+                return lista.get(i).getproxHop();
+		//Vai para o QUALQUER -> usando o próximo HOP
+		// Cria uma rede com 0.0.0.0 para ser o qualquer
+        for(int i = 0; i < lista.size(); i++)
+			if(lista.get(i).getRede().printIpNoCidr().equals("0.0.0.0"))
+				return lista.get(i).getproxHop();	
+			
+		return null; // Deu algum problema !
+    }
+
+    public String toString() {
+        String x = "";
+        for (Entrada e : lista) {
+            System.out.println(e.getRede().printIpNoCidr() + " | " + e.getproxHop().printIpNoCidr() + " | eth" + e.getPorta().getId());
+            x += e.getRede().printIpNoCidr() + " | " + e.getproxHop().printIpNoCidr() + " | eth" + e.getPorta().getId();
+        }
+        return x;
+    }
+    public int size() {
+        return lista.size();
     }
 }
