@@ -15,6 +15,7 @@ public class Interface {
 
     public int getId() { return id; }
     public IPv4 getIp() { return ip; }
+    // public int getRede() { return ip.getRede(); }
     public String getMac() { return mac; }
     public int getMtu() { return mtu; }
     public String getGateway() { return gateway; }

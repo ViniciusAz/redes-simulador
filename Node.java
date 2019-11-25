@@ -11,12 +11,16 @@ public class Node {
 
     public String getId() { return id; }
     public IPv4 getIp() { return porta.getIp(); }
+    public int getRede() { return getIp().getRede(); }
     public String getMac() { return porta.getMac(); }
     public int getMtu() { return porta.getMtu(); }
     public String printIp() { return porta.printIp(); }
     public void add(IPv4 ip, String mac) { atable.add(ip, mac); }
+    public boolean temArp(IPv4 ip) { return atable.get(ip) != null; }
 
     public String toString() {
         return id + " : " + porta + "\n" + atable;
     }
+
+
 }

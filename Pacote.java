@@ -1,30 +1,31 @@
 public class Pacote {
-    //cabecalho?
-    private IPv4 origem;
-    private IPv4 destino;
+    private String mensagem;
     private int ttl;
-    private boolean temProximo; //1 = tem, 0 = ultimo
-    private int offset;
-
-    private List<Rota> rota;
+    private int mf; //more fragments (1=temproximo 0=ultimo)
+    private int off;
     
-    public Pacote(IPv4 origem, IPv4 destino, int ttl) {
-        this.origem = origem;
-        this.destino = destino;
+    public Pacote(String mensagem, int ttl, int mf, int off) {
+        this.mensagem = mensagem;
         this.ttl = ttl;
+        this.mf = mf;
+        this.off = off;
     }
-    public Pacote(IPv4 origem, IPv4 destino, int ttl, boolean temProximo, int offset) {
-        this.origem = origem;
-        this.destino = destino;
+    public Pacote(String mensagem, int ttl) {
+        this.mensagem = mensagem;
         this.ttl = ttl;
-        this.temProximo = temProximo;
-        this.offset = offset;
+        this.mf = 0;
+        this.off = 0;
+    }
+    public Pacote(String mensagem) {
+        this.mensagem = mensagem;
+        this.ttl = 8;
+        this.mf = 0;
+        this.off = 0;
     }
 
-    public IPv4 getOrigem() { return origem; }
-    public IPv4 getDestino() { return destino; }
+    public String getMensagem() { return mensagem; }
     public int getTtl() { return ttl; }
-    public boolean temProximo() { return temProximo; }
-    public int getOffset() { return offset; }
+    public int getMf() { return mf; }
+    public int getOffset() { return off; }
     public void updateTtl() { ttl--; }
 }
