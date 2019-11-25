@@ -5,17 +5,17 @@ public class RouterTable{
 
     private class Entrada {
         private IPv4 rede;
-        private IPv4 destino;
+        private IPv4 proxHop;
         private Interface porta;
 
-        public Entrada(IPv4 rede, IPv4 destino, Interface porta) {
+        public Entrada(IPv4 rede, IPv4 proxHop, Interface porta) {
             this.rede = rede;
-            this.destino = destino;
+            this.proxHop = proxHop;
             this.porta = porta;
         }
         public Interface getPorta() { return porta; }
         public IPv4 getRede() { return rede; }
-        public IPv4 getDestino() { return destino; }
+        public IPv4 getproxHop() { return proxHop; }
     }
 
     ArrayList<Entrada> lista;
@@ -24,8 +24,8 @@ public class RouterTable{
         lista = new ArrayList<Entrada>();
     }
 
-    public void add(IPv4 rede, IPv4 destino, Interface porta) {
-        lista.add(new Entrada(rede, destino, porta));
+    public void add(IPv4 rede, IPv4 proxHop, Interface porta) {
+        lista.add(new Entrada(rede, proxHop, porta));
     }
     public void add(IPv4 rede, Interface porta) {
         lista.add(new Entrada(rede, null, porta));
@@ -38,37 +38,20 @@ public class RouterTable{
         }
         return x;
     }
-    public boolean temSalto() { return destino != null; }
+    public boolean temSalto() { return proxHop != null; }
 
-
-
-
-
-    public int getPortaRede(IPv4 rede) {
+    public Interface getPortaRede(IPv4 rede) {
+		// Cria uma rede com 0.0.0.0 para ser o qualquer
+		IPv4 redeZero = new IPv4("0.0.0.0/0");
+		// Acha o IP e manda para a porta
         for(int i = 0; i < lista.size(); i++)
             if(lista.get(i).getIpRede() == rede)
                 return lista.get(i).getPorta();
-        return null;
-    }
-
-    public int getPortaDestino(IPv4 destino) {
+		//Vai para o QUALQUER -> usando o próximo HOP
         for(int i = 0; i < lista.size(); i++)
-            if(lista.get(i).getIpRede() == destino)
-                return lista.get(i).getPorta();
-        return null;
-    }
-
-    public IPv4 getIpRede(Interface porta) {
-        for(int i = 0; i < lista.size(); i++)
-            if(lista.get(i).getPorta() == porta)
-                return lista.get(i).getIpRede();
-        return null;
-    }
-
-    public IPv4 getIpDestino(Interface porta) {
-        for(int i = 0; i < lista.size(); i++)
-            if(lista.get(i).getPorta() == porta)
-                return lista.get(i).getIpDestino();
-        return null;
+			if(lista.get(i).getIpRede() == redeZero)
+				return lista.get(i).getPorta();	
+			
+		return null; // Deu algum problema !
     }
 }
