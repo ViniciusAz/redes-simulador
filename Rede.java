@@ -45,7 +45,7 @@ public class Rede {
         Router proximoRouter = null;
         Interface portaRouter = null;
         Interface portaRouterAtual = null;
-        boolean ida = false, volta = false;
+        boolean ida = false, volta = false, timeExceeded = false;
         // while(atual instanceof Node && ((Node) atual).getId() != destino.getId()
         //     || atual instanceof Router && ((Router) atual).getId() != destino.getId()) {
         while(!ida || !volta) {
@@ -55,8 +55,24 @@ public class Rede {
                 if(((Node) atual).getRede() == destino.getRede()) {
                     // verifica se o destino ta na ARP, faz ICMP
                     if(((Node) atual).temArp(destino.getIp())) {
-                        ajustaPacote(((Node) atual).getMtu());
-                        for (Pacote p : pacotes) { printIcmpEchoRequest(destino, p, null, null); }
+                        if(!ida){
+                            ajustaPacote(((Node) atual).getMtu());
+                            for (Pacote p : pacotes) {
+                                printIcmpEchoRequest(destino, p, null, null);
+                            }
+                        }
+                        else if(!volta){
+                            ajustaPacote(((Node) atual).getMtu());
+                            for (Pacote p : pacotes) {
+                                printIcmpEchoReply(destino, p, null, null);
+                            }
+                        }
+                        else{ //timeExceeded = true;
+                            ajustaPacote(((Node) atual).getMtu());
+                            for (Pacote p : pacotes) {
+                                printIcmpTimeExceeded(proximoRouter, p, portaRouter, portaRouterAtual);
+                            }
+                        }
                         atual = destino;
                     } else /* ARP Req e Reply */ {
                         printArpRequest(destino.printIp(), null);
@@ -75,8 +91,24 @@ public class Rede {
                     }
                     // verifica se o destino ta na ARP, faz ICMP
                     if(((Node) atual).temArp(portaRouter.getIp())) {
-                        ajustaPacote(((Node) atual).getMtu());
-                        for (Pacote p : pacotes) { printIcmpEchoRequest(proximoRouter, p, portaRouter, null); }
+                        if(!ida){
+                            ajustaPacote(((Node) atual).getMtu());
+                            for (Pacote p : pacotes) { 
+                                printIcmpEchoRequest(proximoRouter, p, portaRouter, null);
+                            }
+                        }
+                        else if(!volta){
+                            ajustaPacote(((Node) atual).getMtu());
+                            for (Pacote p : pacotes) { 
+                                printIcmpEchoReply(proximoRouter, p, portaRouter, null);
+                            }
+                        }
+                        else{ //timeExceeded = true;
+                            ajustaPacote(((Node) atual).getMtu());
+                            for (Pacote p : pacotes) { 
+                                printIcmpTimeExceeded(proximoRouter, p, portaRouter, portaRouterAtual);
+                            }
+                        }
                         atual = proximoRouter;
                         proximoRouter = null;
                         portaRouter = null;
@@ -96,8 +128,24 @@ public class Rede {
                 // se destino ta na mesma rede da interface entao é router > nodo
                 if(portaRouterAtual.getIp().getRede() == destino.getRede()) {
                     if(((Router) atual).temArp(destino.getIp())) {
-                        ajustaPacote(portaRouterAtual.getMtu());
-                        for (Pacote p : pacotes) { printIcmpEchoRequest(destino, p, null, portaRouterAtual); }
+                        if(!ida){
+                            ajustaPacote(portaRouterAtual.getMtu());
+                            for (Pacote p : pacotes) {
+                                printIcmpEchoRequest(destino, p, null, portaRouterAtual);
+                            }
+                        }
+                        else if(!volta){
+                            ajustaPacote(portaRouterAtual.getMtu());
+                            for (Pacote p : pacotes) {
+                                printIcmpEchoReply(destino, p, null, portaRouterAtual);
+                            }
+                        }
+                        else{ //timeExceeded = true;
+                            ajustaPacote(portaRouterAtual.getMtu());
+                            for (Pacote p : pacotes) {
+                                printIcmpTimeExceeded(proximoRouter, p, portaRouter, portaRouterAtual);
+                            }
+                        }
                         atual = destino;
                         // break;
                     } else /* se nao for mesma rede, faz arp rq/reply */ {
@@ -106,7 +154,7 @@ public class Rede {
                         destino.add(portaRouterAtual.getIp(), portaRouterAtual.getMac());
                         ((Router) atual).add(destino.getIp(), destino.getMac());
                         printArpReply(destino, null, portaRouterAtual);
-                    }                    
+                     }                   
                 } else /* router > router */ {
                     for (Router r : roteadores) {
                         portaRouter = r.getPortaGateway(((Router) atual).buscaProximoHop(destino.printRede()));
@@ -117,8 +165,25 @@ public class Rede {
                     }
                     // verifica se o destino ta na ARP
                     if(((Router) atual).temArp(portaRouter.getIp())) {
-                        ajustaPacote(portaRouterAtual.getMtu());
-                        for (Pacote p : pacotes) { printIcmpEchoRequest(proximoRouter, p, portaRouter, portaRouterAtual); }
+                        if(!ida){
+                            ajustaPacote(portaRouterAtual.getMtu());
+                            for (Pacote p : pacotes) {
+                                printIcmpEchoRequest(proximoRouter, p, portaRouter, portaRouterAtual);
+                            }
+                        }
+                        else if(!volta){
+                            ajustaPacote(portaRouterAtual.getMtu());
+                            for (Pacote p : pacotes) {
+                                    printIcmpEchoReply(proximoRouter, p, portaRouter, portaRouterAtual);
+                            }
+                        }
+                        else{ //timeExceeded = true;
+                            ajustaPacote(portaRouterAtual.getMtu());
+                            for (Pacote p : pacotes) {
+                                    printIcmpTimeExceeded(proximoRouter, p, portaRouter, portaRouterAtual);
+                            }
+                        }
+                    
                         atual = proximoRouter;
                         proximoRouter = null;
                         portaRouter = null;
@@ -148,7 +213,7 @@ public class Rede {
                     printIcmpFinal();
                     // System.out.println("DEBUG @ trocou tudo");
                 }
-            } else /* voltando */ {
+            } else if(!volta) /* voltando */ {
                 if(atual instanceof Node && ((Node) atual).getId() == destino.getId()) {
                     // System.out.println("DEBUG @ volta é true");
                     volta = true;
@@ -196,11 +261,11 @@ public class Rede {
             System.out.println(((Node) dest).getId() + " => " + ((Node) atual).getId() + " : ETH (src=" + ((Node) dest).getMac()
                     + " dst=" + ((Node) atual).getMac() + ") \\n ARP - " + ((Node) dest).printIp() + " is at " + ((Node) dest).getMac());
         } else if(atual instanceof Node && dest instanceof Router) {
-            System.out.println(((Router) dest).getId() + " => " + ((Node) atual).getId() + " : ETH (src=" + interf.getMac() + " dst=" + ((Node) atual).getMac() + ") \n ARP - " + interf.printIp() + " is at " + interf.getMac());
+            System.out.println(((Router) dest).getId() + " => " + ((Node) atual).getId() + " : ETH (src=" + interf.getMac() + " dst=" + ((Node) atual).getMac() + ") \\n ARP - " + interf.printIp() + " is at " + interf.getMac());
         } else if(atual instanceof Router && dest instanceof Router) {
-            System.out.println(((Router) dest).getId() + " => " + ((Router) atual).getId() + " : ETH (src=" + interf.getMac() + " dst=" + interfAtual.getMac() + ") \n ARP - " + interf.printIp() + " is at " + interf.getMac());
+            System.out.println(((Router) dest).getId() + " => " + ((Router) atual).getId() + " : ETH (src=" + interf.getMac() + " dst=" + interfAtual.getMac() + ") \\n ARP - " + interf.printIp() + " is at " + interf.getMac());
         } else if(atual instanceof Router && dest instanceof Node) {
-            System.out.println(((Node) dest).getId() + " => " + ((Router) atual).getId() + " : ETH (src=" + ((Node) dest).getMac() + " dst=" + interfAtual.getMac() + ") \n ARP - " + ((Node) dest).printIp() + " is at " + ((Node) dest).getMac());
+            System.out.println(((Node) dest).getId() + " => " + ((Router) atual).getId() + " : ETH (src=" + ((Node) dest).getMac() + " dst=" + interfAtual.getMac() + ") \\n ARP - " + ((Node) dest).printIp() + " is at " + ((Node) dest).getMac());
         } else {
             System.out.println("ARP REPLY DEU PAU");
         }
@@ -208,21 +273,54 @@ public class Rede {
 
     public void printIcmpEchoRequest(Object dest, Pacote pct, Interface interf, Interface interfAtual) {
         // Pacotes ICMP Echo Request: <src_name> => <dst_name> : ETH (src=<MAC_src> dst =<MAC_dst>) \n IP (src=<IP_src> dst=<IP_dst> ttl=<TTL> mf=<mf_flag> off=<offset>) \n ICMP - Echo request (data=<msg>);
+            if(atual instanceof Node && dest instanceof Node) {
+                System.out.println(((Node) atual).getId() + " => " + ((Node) dest).getId() + " : ETH (src=" + ((Node) atual).getMac() + " dst=" + ((Node) dest).getMac() + ") \\n IP (src=" + ((Node) atual).printIp() + " dst=" + ((Node) dest).printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo request (data=" + pct.getMensagem() + ");");
+            } else if(atual instanceof Node && dest instanceof Router) {
+                System.out.println(((Node) atual).getId() + " => " + ((Router) dest).getId() + " : ETH (src=" + ((Node) atual).getMac() + " dst=" + interf.getMac() + ") \\n IP (src=" + ((Node) atual).printIp() + " dst=" + interf.printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo request (data=" + pct.getMensagem() + ");");
+            } else if(atual instanceof Router && dest instanceof Router) {
+                System.out.println(((Router) atual).getId() + " => " + ((Router) dest).getId() + " : ETH (src=" + interfAtual.getMac() + " dst=" + interf.getMac() + ") \\n IP (src=" + interfAtual.printIp() + " dst=" + interf.printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo request (data=" + pct.getMensagem() + ");");
+            } else if(atual instanceof Router && dest instanceof Node) {
+                System.out.println(((Router) atual).getId() + " => " + ((Node) dest).getId() + " : ETH (src=" + interfAtual.getMac() + " dst=" + ((Node) dest).getMac() + ") \\n IP (src=" + interfAtual.printIp() + " dst=" + ((Node) dest).printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo request (data=" + pct.getMensagem() + ");");
+            } else {
+                System.out.println("ICMP DEU PAU");
+            } 
+    }
+    public void printIcmpEchoReply(Object dest, Pacote pct, Interface interf, Interface interfAtual) {
+        // Pacotes ICMP Echo Reply: <src_name> => <dst_name> : ETH (src=<MAC_src> dst =<MAC_dst>) \n IP (src=<IP_src> dst=<IP_dst> ttl=<TTL> mf=<mf_flag> off=<offset>) \n ICMP - Echo request (data=<msg>);
+            if(atual instanceof Node && dest instanceof Node) {
+                System.out.println(((Node) atual).getId() + " => " + ((Node) dest).getId() + " : ETH (src=" + ((Node) atual).getMac() + " dst=" + ((Node) dest).getMac() + ") \\n IP (src=" + ((Node) atual).printIp() + " dst=" + ((Node) dest).printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo Reply (data=" + pct.getMensagem() + ");");
+            } else if(atual instanceof Node && dest instanceof Router) {
+                System.out.println(((Node) atual).getId() + " => " + ((Router) dest).getId() + " : ETH (src=" + ((Node) atual).getMac() + " dst=" + interf.getMac() + ") \\n IP (src=" + ((Node) atual).printIp() + " dst=" + interf.printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo Reply (data=" + pct.getMensagem() + ");");
+            } else if(atual instanceof Router && dest instanceof Router) {
+                System.out.println(((Router) atual).getId() + " => " + ((Router) dest).getId() + " : ETH (src=" + interfAtual.getMac() + " dst=" + interf.getMac() + ") \\n IP (src=" + interfAtual.printIp() + " dst=" + interf.printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo Reply (data=" + pct.getMensagem() + ");");
+            } else if(atual instanceof Router && dest instanceof Node) {
+                System.out.println(((Router) atual).getId() + " => " + ((Node) dest).getId() + " : ETH (src=" + interfAtual.getMac() + " dst=" + ((Node) dest).getMac() + ") \\n IP (src=" + interfAtual.printIp() + " dst=" + ((Node) dest).printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo Reply (data=" + pct.getMensagem() + ");");
+            } else {
+                System.out.println("ICMP DEU PAU");
+            } 
+    }
+
+
+
+    public void printIcmpFinal() {
+        // Processamento final do ICMP Echo Request/Reply no nó: <dst_name> rbox <dst_name> : Received <msg>;
+        System.out.println(destino.getId() + " rbox " + destino.getId() + " : Received " + mensagem);
+    }
+
+    public void printIcmpTimeExceeded(Object dest, Pacote pct, Interface interf, Interface interfAtual){
+        // Precisa retornar para o pacote origem um erro de ICMP - Time Exceeded
+        //exemplo: R2 => R3 : ETH (src=:22 dst=:31) \n IP (src=100.10.30.1 dst=30.0.0.2 ttl=8 mf=0 off=0) \n ICMP - Time Exceeded;
         if(atual instanceof Node && dest instanceof Node) {
-            System.out.println(((Node) atual).getId() + " => " + ((Node) dest).getId() + " : ETH (src=" + ((Node) atual).getMac() + " dst=" + ((Node) dest).getMac() + ") \\n IP (src=" + ((Node) atual).printIp() + " dst=" + ((Node) dest).printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo request (data=" + pct.getMensagem() + ");");
+            System.out.println(((Node) atual).getId() + " => " + ((Node) dest).getId() + " : ETH (src=" + ((Node) atual).getMac() + " dst=" + ((Node) dest).getMac() + ") \\n IP (src=" + ((Node) atual).printIp() + " dst=" + ((Node) dest).printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Time Exceeded;");
         } else if(atual instanceof Node && dest instanceof Router) {
-            System.out.println(((Node) atual).getId() + " => " + ((Router) dest).getId() + " : ETH (src=" + ((Node) atual).getMac() + " dst=" + interf.getMac() + ") \\n IP (src=" + ((Node) atual).printIp() + " dst=" + interf.printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo request (data=" + pct.getMensagem() + ");");
+            System.out.println(((Node) atual).getId() + " => " + ((Router) dest).getId() + " : ETH (src=" + ((Node) atual).getMac() + " dst=" + interf.getMac() + ") \\n IP (src=" + ((Node) atual).printIp() + " dst=" + interf.printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Time Exceeded;");
         } else if(atual instanceof Router && dest instanceof Router) {
-            System.out.println(((Router) atual).getId() + " => " + ((Router) dest).getId() + " : ETH (src=" + interfAtual.getMac() + " dst=" + interf.getMac() + ") \\n IP (src=" + interfAtual.printIp() + " dst=" + interf.printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo request (data=" + pct.getMensagem() + ");");
+            System.out.println(((Router) atual).getId() + " => " + ((Router) dest).getId() + " : ETH (src=" + interfAtual.getMac() + " dst=" + interf.getMac() + ") \\n IP (src=" + interfAtual.printIp() + " dst=" + interf.printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Time Exceeded;");
         } else if(atual instanceof Router && dest instanceof Node) {
-            System.out.println(((Router) atual).getId() + " => " + ((Node) dest).getId() + " : ETH (src=" + interfAtual.getMac() + " dst=" + ((Node) dest).getMac() + ") \\n IP (src=" + interfAtual.printIp() + " dst=" + ((Node) dest).printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo request (data=" + pct.getMensagem() + ");");
+            System.out.println(((Router) atual).getId() + " => " + ((Node) dest).getId() + " : ETH (src=" + interfAtual.getMac() + " dst=" + ((Node) dest).getMac() + ") \\n IP (src=" + interfAtual.printIp() + " dst=" + ((Node) dest).printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Time Exceeded;");
         } else {
             System.out.println("ICMP DEU PAU");
         } 
-    }
-    public void printIcmpFinal() {
-        // Processamento final do ICMP Echo Request/Reply no nó: <dst_name> rbox <dst_name> : Received <msg>;
-        System.out.println(destino.getId() + " rbox " + destino.getId() + " : Receuved " + mensagem);
     }
 
 // Pacotes ICMP Echo Reply: <src_name> => <dst_name> : ETH (src=<MAC_src> dst =<MAC_dst>) \n IP (src=<IP_src> dst=<IP_dst> ttl=<TTL> mf=<mf_flag> off=<offset>) \n ICMP - Echo reply (data=<msg>);
