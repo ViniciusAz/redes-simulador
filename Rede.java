@@ -45,33 +45,27 @@ public class Rede {
         Router proximoRouter = null;
         Interface portaRouter = null;
         Interface portaRouterAtual = null;
-        // System.out.println("DEBUG @ ");
-        // System.out.println("DEBUG @ " + ((Node) atual).getId());
-        while(atual instanceof Node && ((Node) atual).getId() != destino.getId()
-            || atual instanceof Router && ((Router) atual).getId() != destino.getId()) {
+        boolean ida = false, volta = false;
+        // while(atual instanceof Node && ((Node) atual).getId() != destino.getId()
+        //     || atual instanceof Router && ((Router) atual).getId() != destino.getId()) {
+        while(!ida || !volta) {
+            // Nodo enviando > 
             if(atual instanceof Node) {
-                //processo todo
+                // Nodo enviando > Nodo
                 if(((Node) atual).getRede() == destino.getRede()) {
-                    // verifica se o destino ta na ARP
-                    // System.out.println("DEBUG @ ta na msm rede");
+                    // verifica se o destino ta na ARP, faz ICMP
                     if(((Node) atual).temArp(destino.getIp())) {
-                        // System.out.println("DEBUG @ tem arp");
                         ajustaPacote(((Node) atual).getMtu());
                         for (Pacote p : pacotes) { printIcmpEchoRequest(destino, p, null, null); }
                         atual = destino;
-                        // System.out.println("DEBUG @ atual virou destino");
-                    } else /* se nao for mesma rede, faz arp rq/reply */ {
-                        // System.out.println("DEBUG @ vai add arp");
+                    } else /* ARP Req e Reply */ {
                         printArpRequest(destino.printIp(), null);
-                        // add entradas na arp
                         destino.add(((Node) atual).getIp(), ((Node) atual).getMac());
-                        ((Node) atual).add(((Node) destino).getIp(), destino.getMac());
                         printArpReply(destino, null, null);
-                        // System.out.println("DEBUG @ tem arp? " + ((Node) atual).temArp(destino.getIp()));
-                        
+                        ((Node) atual).add(((Node) destino).getIp(), destino.getMac());
                     }
-
-                } else {
+                } else /* Nodo enviando > Router */ {
+                    // Ja deixa a Interface de rede em maos
                     for (Router r : roteadores) {
                         portaRouter = r.getPortaGateway(((Node) atual).getGateway());
                         if(portaRouter != null) {
@@ -79,50 +73,39 @@ public class Rede {
                             break;
                         }
                     }
-                    // verifica se o destino ta na ARP
-                    // System.out.println("DEBUG @ ta na msm rede");
+                    // verifica se o destino ta na ARP, faz ICMP
                     if(((Node) atual).temArp(portaRouter.getIp())) {
-                        // System.out.println("DEBUG @ tem arp");
                         ajustaPacote(((Node) atual).getMtu());
                         for (Pacote p : pacotes) { printIcmpEchoRequest(proximoRouter, p, portaRouter, null); }
                         atual = proximoRouter;
                         proximoRouter = null;
                         portaRouter = null;
-                        // System.out.println("DEBUG @ atual virou destino");
-                    } else /* se nao for mesma rede, faz arp rq/reply usando gateway padrao */ {
-                        // System.out.println("DEBUG @ vai add arp");
+                    } else /* ARP Req e Reply */ {
                         //tem q buscar o ip do router (da mesma rede)
                         printArpRequest(portaRouter.printIp(), null);
                         // add entradas na arp
                         proximoRouter.add(((Node) atual).getIp(), ((Node) atual).getMac());
-                        ((Node) atual).add(portaRouter.getIp(), portaRouter.getMac());
                         printArpReply(proximoRouter, portaRouter, null);
-                        // System.out.println("DEBUG @ tem arp? " + ((Node) atual).temArp(destino.getIp()));
+                        ((Node) atual).add(portaRouter.getIp(), portaRouter.getMac());
                         
                     }
                 }
 
             } else /*atual é router*/ {
                 portaRouterAtual = ((Router) atual).buscaRouterTable(destino.printRede());
-                // System.out.println("DEBUG @ porta saida router "  + portaRouter.getId());
                 // se destino ta na mesma rede da interface entao é router > nodo
                 if(portaRouterAtual.getIp().getRede() == destino.getRede()) {
                     if(((Router) atual).temArp(destino.getIp())) {
-                        // System.out.println("DEBUG @ tem arp");
                         ajustaPacote(portaRouterAtual.getMtu());
                         for (Pacote p : pacotes) { printIcmpEchoRequest(destino, p, null, portaRouterAtual); }
                         atual = destino;
-                        // printFIM
                         // break;
-                        // System.out.println("DEBUG @ atual virou destino");
                     } else /* se nao for mesma rede, faz arp rq/reply */ {
-                        // System.out.println("DEBUG @ vai add arp");
                         printArpRequest(destino.printIp(), portaRouterAtual);
                         // add entradas na arp
                         destino.add(portaRouterAtual.getIp(), portaRouterAtual.getMac());
                         ((Router) atual).add(destino.getIp(), destino.getMac());
                         printArpReply(destino, null, portaRouterAtual);
-                        // System.out.println("DEBUG @ tem arp? " + ((Node) atual).temArp(destino.getIp()));
                     }                    
                 } else /* router > router */ {
                     for (Router r : roteadores) {
@@ -133,36 +116,47 @@ public class Rede {
                         }
                     }
                     // verifica se o destino ta na ARP
-                    // System.out.println("DEBUG @ ta na msm rede");
-
-
-                    //AJUSTARRRRRRR
                     if(((Router) atual).temArp(portaRouter.getIp())) {
-                        // System.out.println("DEBUG @ tem arp");
                         ajustaPacote(portaRouterAtual.getMtu());
                         for (Pacote p : pacotes) { printIcmpEchoRequest(proximoRouter, p, portaRouter, portaRouterAtual); }
                         atual = proximoRouter;
                         proximoRouter = null;
                         portaRouter = null;
                         portaRouterAtual = null;
-                        // break;
-                        // System.out.println("DEBUG @ atual virou destino");
+                        // if(ida) break;
                     } else /* se nao for mesma rede, faz arp rq/reply usando gateway padrao */ {
-                        // System.out.println("DEBUG @ vai add arp");
                         //tem q buscar o ip do router (da mesma rede)
                         printArpRequest(portaRouter.printIp(), portaRouterAtual);
                         // add entradas na arp
                         proximoRouter.add(portaRouterAtual.getIp(), portaRouterAtual.getMac());
                         ((Router) atual).add(portaRouter.getIp(), portaRouter.getMac());
                         printArpReply(proximoRouter, portaRouter, portaRouterAtual);
-                        // System.out.println("DEBUG @ tem arp? " + ((Node) atual).temArp(destino.getIp()));
                         
                     }
                 }
             }
-            if(atual instanceof Node) System.out.println("DEBUG @ Atual = " + ((Node) atual).getId());
-            else System.out.println("DEBUG @ Atual = " + ((Router) atual).getId());
+            // if(atual instanceof Node) System.out.println("DEBUG @ Atual = " + ((Node) atual).getId());
+            // else System.out.println("DEBUG @ Atual = " + ((Router) atual).getId());
+
+            if(!ida) {
+                // System.out.println("DEBUG @ entrou no ida");
+                if(atual instanceof Node && ((Node) atual).getId() == destino.getId()) {
+                    ida = true;
+                    Node trocaAux = origem;
+                    origem = destino;
+                    destino = trocaAux;
+                    printIcmpFinal();
+                    // System.out.println("DEBUG @ trocou tudo");
+                }
+            } else /* voltando */ {
+                if(atual instanceof Node && ((Node) atual).getId() == destino.getId()) {
+                    // System.out.println("DEBUG @ volta é true");
+                    volta = true;
+                    printIcmpFinal();
+                }
+            }
         }//while
+        
             
     }
 
@@ -186,7 +180,6 @@ public class Rede {
             }
         }
         pacotes = novoPct;
-        System.out.println("DEBUG @ print pacotes (" + mtu + ") " + pacotes.size());
     }
     
     public void printArpRequest(String ipDestino, Interface interf) {
@@ -227,8 +220,11 @@ public class Rede {
             System.out.println("ICMP DEU PAU");
         } 
     }
+    public void printIcmpFinal() {
+        // Processamento final do ICMP Echo Request/Reply no nó: <dst_name> rbox <dst_name> : Received <msg>;
+        System.out.println(destino.getId() + " rbox " + destino.getId() + " : Receuved " + mensagem);
+    }
 
 // Pacotes ICMP Echo Reply: <src_name> => <dst_name> : ETH (src=<MAC_src> dst =<MAC_dst>) \n IP (src=<IP_src> dst=<IP_dst> ttl=<TTL> mf=<mf_flag> off=<offset>) \n ICMP - Echo reply (data=<msg>);
 // Pacotes ICMP Time Exceeded: <src_name> => <dst_name> : ETH (src=<MAC_src> dst =<MAC_dst>) \n IP (src=<IP_src> dst=<IP_dst> ttl=<TTL>) \n ICMP - Time Exceeded
-// Processamento final do ICMP Echo Request/Reply no nó: <dst_name> rbox <dst_name> : Received <msg>;
 }
