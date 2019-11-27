@@ -62,11 +62,13 @@ public class Rede {
 								ida = true; 
 								timeExceeded = false; 
 								destino = origem;
-								System.out.println("DEBUG @ timeExceeded");
-							}else
-								for (Pacote p : pacotes) {
-									printIcmpEchoRequest(destino, p, null, null);
+								// // System.out.println("DEBUG @ timeExceeded");
+							}else {
+                                for (Pacote p : pacotes) {
+                                    printIcmpEchoRequest(destino, p, null, null);
 								}
+                                atual = destino;
+                            }
                         }
                         else if(!volta){
                             ajustaPacote(((Node) atual).getMtu());
@@ -75,19 +77,22 @@ public class Rede {
 								ida = true; 
 								timeExceeded = false; 
 								destino = origem;
-								System.out.println("DEBUG @ timeExceeded");
-							}else
-								for (Pacote p : pacotes) {
-									printIcmpEchoReply(destino, p, null, null);
+                                pacotes = new ArrayList<Pacote>();
+								// System.out.println("DEBUG @ timeExceeded");
+							}else {
+                                for (Pacote p : pacotes) {
+                                    printIcmpEchoReply(destino, p, null, null);
 								}
+                                atual = destino;
+                            }
                         }
                         else if(!timeExceeded){ //timeExceeded = true;
                             ajustaPacote(((Node) atual).getMtu());
                             for (Pacote p : pacotes) {
-                                printIcmpTimeExceeded(proximoRouter, p, portaRouter, portaRouterAtual);
+                                printIcmpTimeExceeded(destino, p, null, null);
                             }
+                            atual = destino;
                         }
-                        atual = destino;
                     } else /* ARP Req e Reply */ {
                         printArpRequest(destino.printIp(), null);
                         destino.add(((Node) atual).getIp(), ((Node) atual).getMac());
@@ -112,11 +117,15 @@ public class Rede {
 								ida = true; 
 								timeExceeded = false; 
 								destino = origem;
-								System.out.println("DEBUG @ timeExceeded");
-							}else
-								for (Pacote p : pacotes) {
-									printIcmpEchoRequest(proximoRouter, p, portaRouter, null);
+								// System.out.println("DEBUG @ timeExceeded");
+							}else {
+                                for (Pacote p : pacotes) {
+                                    printIcmpEchoRequest(proximoRouter, p, portaRouter, null);
 								}
+                                atual = proximoRouter;
+                                proximoRouter = null;
+                                portaRouter = null;
+                            }
                         }
                         else if(!volta){
                             ajustaPacote(((Node) atual).getMtu());
@@ -125,21 +134,26 @@ public class Rede {
 								ida = true; 
 								timeExceeded = false; 
 								destino = origem;
-								System.out.println("DEBUG @ timeExceeded");
-							}else
-								for (Pacote p : pacotes) {
-									printIcmpEchoReply(proximoRouter, p, portaRouter, null);
+                                pacotes = new ArrayList<Pacote>();
+								// System.out.println("DEBUG @ timeExceeded");
+							}else {
+                                for (Pacote p : pacotes) {
+                                    printIcmpEchoReply(proximoRouter, p, portaRouter, null);
 								}
+                                atual = proximoRouter;
+                                proximoRouter = null;
+                                portaRouter = null;
+                            }
                         }
                         else if(!timeExceeded){ //timeExceeded = true;
                             ajustaPacote(((Node) atual).getMtu());
                             for (Pacote p : pacotes) { 
-                                printIcmpTimeExceeded(proximoRouter, p, portaRouter, portaRouterAtual);
+                                printIcmpTimeExceeded(proximoRouter, p, portaRouter, null);
                             }
+                            atual = proximoRouter;
+                            proximoRouter = null;
+                            portaRouter = null;
                         }
-                        atual = proximoRouter;
-                        proximoRouter = null;
-                        portaRouter = null;
                     } else /* ARP Req e Reply */ {
                         //tem q buscar o ip do router (da mesma rede)
                         printArpRequest(portaRouter.printIp(), null);
@@ -163,11 +177,13 @@ public class Rede {
 								ida = true; 
 								timeExceeded = false; 
 								destino = origem;
-								System.out.println("DEBUG @ timeExceeded");
-							}else
-								for (Pacote p : pacotes) {
-										printIcmpEchoRequest(destino, p, null, portaRouterAtual);
+								// System.out.println("DEBUG @ timeExceeded");
+							}else {
+                                for (Pacote p : pacotes) {
+                                    printIcmpEchoRequest(destino, p, null, portaRouterAtual);
 								}
+                                atual = destino;
+                            }
                         }
                         else if(!volta){
                             ajustaPacote(portaRouterAtual.getMtu());
@@ -176,19 +192,22 @@ public class Rede {
 								ida = true; 
 								timeExceeded = false; 
 								destino = origem;
-								System.out.println("DEBUG @ timeExceeded");
-							}else
-								for (Pacote p : pacotes) {
-									printIcmpEchoReply(destino, p, null, portaRouterAtual);
+                                pacotes = new ArrayList<Pacote>();
+								// System.out.println("DEBUG @ timeExceeded");
+							} else {
+                                for (Pacote p : pacotes) {
+                                    printIcmpEchoReply(destino, p, null, portaRouterAtual);
 								}
+                                atual = destino;
+                            }
                         }
                         else if(!timeExceeded){ //timeExceeded = true;
                             ajustaPacote(portaRouterAtual.getMtu());
                             for (Pacote p : pacotes) {
-                                printIcmpTimeExceeded(proximoRouter, p, portaRouter, portaRouterAtual);
+                                printIcmpTimeExceeded(destino, p, null, portaRouterAtual);
                             }
+                            atual = destino;
                         }
-                        atual = destino;
                         // break;
                     } else /* se nao for mesma rede, faz arp rq/reply */ {
                         printArpRequest(destino.printIp(), portaRouterAtual);
@@ -209,16 +228,21 @@ public class Rede {
                     if(((Router) atual).temArp(portaRouter.getIp())) {
                         if(!ida){
                             ajustaPacote(portaRouterAtual.getMtu());
-							if(pacotes.get(0).getTtl() < 1){ // Verifica TTL
+                            if(pacotes.get(0).getTtl() < 1){ // Verifica TTL
 								volta = true; 
 								ida = true; 
 								timeExceeded = false; 
 								destino = origem;
-								System.out.println("DEBUG @ timeExceeded");
-							}else
-								for (Pacote p : pacotes) {
-									printIcmpEchoRequest(proximoRouter, p, portaRouter, portaRouterAtual);
-								}
+								// System.out.println("DEBUG @ timeExceeded");
+							} else {
+                                for (Pacote p : pacotes) {
+                                    printIcmpEchoRequest(proximoRouter, p, portaRouter, portaRouterAtual);
+                                }
+                                atual = proximoRouter;
+                                proximoRouter = null;
+                                portaRouter = null;
+                                portaRouterAtual = null;
+                            }
                         }
                         else if(!volta){
                             ajustaPacote(portaRouterAtual.getMtu());
@@ -227,23 +251,28 @@ public class Rede {
 								ida = true; 
 								timeExceeded = false; 
 								destino = origem;
-								System.out.println("DEBUG @ timeExceeded");
-							}else
-								for (Pacote p : pacotes) {
-									printIcmpEchoReply(proximoRouter, p, portaRouter, portaRouterAtual);
-								}
-                        }
-                        else if(!timeExceeded){ //timeExceeded
+                                pacotes = new ArrayList<Pacote>();
+                                // System.out.println("DEBUG @ timeExceeded");
+                                // System.out.println("DEBUG @ Atual = " + ((Router) atual).getId());
+							} else {
+                                for (Pacote p : pacotes) {
+                                    printIcmpEchoReply(proximoRouter, p, portaRouter, portaRouterAtual);
+                                }
+                                atual = proximoRouter;
+                                proximoRouter = null;
+                                portaRouter = null;
+                                portaRouterAtual = null;
+                            }
+                        } else if(!timeExceeded) { //timeExceeded
                             ajustaPacote(portaRouterAtual.getMtu());
                             for (Pacote p : pacotes) {
                                     printIcmpTimeExceeded(proximoRouter, p, portaRouter, portaRouterAtual);
                             }
+                            atual = proximoRouter;
+                            proximoRouter = null;
+                            portaRouter = null;
+                            portaRouterAtual = null;
                         }
-                    
-                        atual = proximoRouter;
-                        proximoRouter = null;
-                        portaRouter = null;
-                        portaRouterAtual = null;
                         // if(ida) break;
                     } else /* se nao for mesma rede, faz arp rq/reply usando gateway padrao */ {
                         //tem q buscar o ip do router (da mesma rede)
@@ -256,8 +285,8 @@ public class Rede {
                     }
                 }
             }
-            // if(atual instanceof Node) System.out.println("DEBUG @ Atual = " + ((Node) atual).getId());
-            // else System.out.println("DEBUG @ Atual = " + ((Router) atual).getId());
+            // if(ida && volta && !timeExceeded && atual instanceof Node) System.out.println("DEBUG @ Atual = " + ((Node) atual).getId());
+            // else if(ida && volta && !timeExceeded && atual instanceof Router) System.out.println("DEBUG @ Atual = " + ((Router) atual).getId());
 
             if(!ida) {
                 // System.out.println("DEBUG @ entrou no ida");
@@ -278,8 +307,10 @@ public class Rede {
                     printIcmpFinal();
                 }
             }else if(!timeExceeded){ //Passou por tudo até o timeExceeded
-				//timeExceeded = true;
-			}
+                if(atual instanceof Node && ((Node) atual).getId() == destino.getId()) {
+                    timeExceeded = true;
+                }
+            }
         }//while
         
             
@@ -299,8 +330,7 @@ public class Rede {
             for (Pacote p : pacotes) {
                 novaMsg = Arrays.asList(p.getMensagem().split("(?<=\\G.{" + mtu + "})"));
                 for (int i = 0; i < novaMsg.size(); i++) {
-                    if(i == novaMsg.size()-1) novoPct.add(new Pacote(novaMsg.get(i), p.getTtl()-1, 0, p.getOffset()+i*mtu));
-                    else novoPct.add(new Pacote(novaMsg.get(i), p.getTtl()-1, 0, p.getOffset()+i*mtu));
+                    novoPct.add(new Pacote(novaMsg.get(i), p.getTtl()-1, p.getMf(), p.getOffset()+i*mtu));
                 }
             }
         }
@@ -344,8 +374,8 @@ public class Rede {
             } else {
                 System.out.println("ICMP REQUEST DEU PAU");
             } 
-    }
-    public void printIcmpEchoReply(Object dest, Pacote pct, Interface interf, Interface interfAtual) {
+        }
+        public void printIcmpEchoReply(Object dest, Pacote pct, Interface interf, Interface interfAtual) {
         // Pacotes ICMP Echo Reply: <src_name> => <dst_name> : ETH (src=<MAC_src> dst =<MAC_dst>) \n IP (src=<IP_src> dst=<IP_dst> ttl=<TTL> mf=<mf_flag> off=<offset>) \n ICMP - Echo request (data=<msg>);
             if(atual instanceof Node && dest instanceof Node) {
                 System.out.println(((Node) atual).getId() + " => " + ((Node) dest).getId() + " : ETH (src=" + ((Node) atual).getMac() + " dst=" + ((Node) dest).getMac() + ") \\n IP (src=" + origem.printIp() + " dst=" + destino.printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Echo Reply (data=" + pct.getMensagem() + ");");
@@ -370,6 +400,7 @@ public class Rede {
     public void printIcmpTimeExceeded(Object dest, Pacote pct, Interface interf, Interface interfAtual){
         // Precisa retornar para o pacote origem um erro de ICMP - Time Exceeded
         //exemplo: R2 => R3 : ETH (src=:22 dst=:31) \n IP (src=100.10.30.1 dst=30.0.0.2 ttl=8 mf=0 off=0) \n ICMP - Time Exceeded;
+        // Pacotes ICMP Time Exceeded: <src_name> => <dst_name> : ETH (src=<MAC_src> dst =<MAC_dst>) \n IP (src=<IP_src> dst=<IP_dst> ttl=<TTL>) \n ICMP - Time Exceeded
         if(atual instanceof Node && dest instanceof Node) {
             System.out.println(((Node) atual).getId() + " => " + ((Node) dest).getId() + " : ETH (src=" + ((Node) atual).getMac() + " dst=" + ((Node) dest).getMac() + ") \\n IP (src=" + ((Node) atual).printIp() + " dst=" + origem.printIp() + " ttl=" + pct.getTtl() + " mf=" + pct.getMf() + " off=" + pct.getOffset() + ") \\n ICMP - Time Exceeded;");
         } else if(atual instanceof Node && dest instanceof Router) {
@@ -383,6 +414,4 @@ public class Rede {
         } 
     }
 
-// Pacotes ICMP Echo Reply: <src_name> => <dst_name> : ETH (src=<MAC_src> dst =<MAC_dst>) \n IP (src=<IP_src> dst=<IP_dst> ttl=<TTL> mf=<mf_flag> off=<offset>) \n ICMP - Echo reply (data=<msg>);
-// Pacotes ICMP Time Exceeded: <src_name> => <dst_name> : ETH (src=<MAC_src> dst =<MAC_dst>) \n IP (src=<IP_src> dst=<IP_dst> ttl=<TTL>) \n ICMP - Time Exceeded
 }
