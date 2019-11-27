@@ -310,6 +310,10 @@ public class Rede {
                 if(atual instanceof Node && ((Node) atual).getId() == destino.getId()) {
                     timeExceeded = true;
                 }
+                if(pacotes.size() > 0 && pacotes.get(0).getTtl() < 1) { 
+                    timeExceeded = true;
+                    System.out.println("TimeExceeded em looping - Finalizei");
+                }
             }
         }//while
         

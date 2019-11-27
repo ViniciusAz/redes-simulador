@@ -33,6 +33,7 @@ public class Leitura {
             String[] aux;
             while (linha != null) {
                 linha = lerArq.readLine(); // lê a linha inteira
+                if(linha.trim().equals("")) break;
                 // System.out.println(linha);
                 if(linha.length() > 0 && linha.charAt(0) == '$') break;
                 if(linha.equals("#NODE")) { ehNode = true; ehRouter = ehRouterT = false; }
